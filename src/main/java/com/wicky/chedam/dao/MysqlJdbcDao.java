@@ -1,5 +1,6 @@
 package com.wicky.chedam.dao;
 
+import com.wicky.chedam.service.bo.SqlEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,7 +16,7 @@ public class MysqlJdbcDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public List<List<TypedObject>> extractData(String query, Map<String, Class<?>> types) {
+    public List<List<TypedObject>> getDbResult(String query, Map<String, Class<?>> types) {
         List<List<TypedObject>> results = jdbcTemplate.query(query, (rs, rowNum) ->
                 types.entrySet().stream().map(i ->
                 {
@@ -29,5 +30,11 @@ public class MysqlJdbcDao {
                 }).collect(Collectors.toList())
         );
         return results;
+    }
+
+    public List<List<TypedObject>> getDbResult(SqlEntity entity) {
+        return entity.getQueryList().stream()
+                .flatMap(e -> getDbResult(e.getQuery(), e.getTypes()).stream())
+                .collect(Collectors.toList());
     }
 }

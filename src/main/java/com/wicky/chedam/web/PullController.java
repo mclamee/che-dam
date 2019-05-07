@@ -3,7 +3,6 @@ package com.wicky.chedam.web;
 import com.wicky.chedam.service.PullService;
 import com.wicky.chedam.web.vo.Rope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,12 +19,12 @@ public class PullController {
     private PullService service;
 
     @PostMapping(value = "/pull", consumes = {APPLICATION_JSON_VALUE})
-    public @ResponseBody String pull(@RequestBody Rope root){
+    public @ResponseBody String pull(@RequestBody Rope ropeNode){
 
-        List<String> insertSqlList = service.extract(root);
+        List<String> exportedInsertStatements = service.pullRope(ropeNode);
 
-        System.out.println("insertSqlList => ");
-        insertSqlList.forEach(System.out::println);
+        System.out.println("exportedInsertStatements => ");
+        exportedInsertStatements.forEach(System.out::println);
 
         return "success";
     }
