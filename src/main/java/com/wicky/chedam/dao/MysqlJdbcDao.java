@@ -1,5 +1,8 @@
 package com.wicky.chedam.dao;
 
+import com.wicky.chedam.dao.po.TypedCell;
+import com.wicky.chedam.dao.po.TypedEntity;
+import com.wicky.chedam.dao.po.TypedRow;
 import com.wicky.chedam.service.bo.SqlEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,25 +19,31 @@ public class MysqlJdbcDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public List<List<TypedObject>> getDbResult(String query, Map<String, Class<?>> types) {
-        List<List<TypedObject>> results = jdbcTemplate.query(query, (rs, rowNum) ->
+    public List<TypedRow> getDbResult(String query, Map<String, Class<?>> types) {
+        List<TypedRow> results = jdbcTemplate.query(query, (rs, rowNum) ->
                 types.entrySet().stream().map(i ->
                 {
-                    TypedObject obj = TypedObject.builder().name(i.getKey()).type(i.getValue()).build();
+                    TypedCell cell = TypedCell.builder().name(i.getKey()).type(i.getValue()).build();
                     try {
-                        obj.setValue(rs.getObject(obj.getName()));
+                        cell.setValue(rs.getObject(cell.getName()));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                    return obj;
-                }).collect(Collectors.toList())
+                    return cell;
+                }).collect(TypedRow::new, TypedRow::add, TypedRow::addAll)
         );
         return results;
     }
 
-    public List<List<TypedObject>> getDbResult(SqlEntity entity) {
-        return entity.getQueryList().stream()
-                .flatMap(e -> getDbResult(e.getQuery(), e.getTypes()).stream())
-                .collect(Collectors.toList());
+    public TypedEntity getDbResult(SqlEntity entity) {
+        // merge the list
+        List<TypedRow> mergedRows = entity.getQueryList().stream()
+            .flatMap(e -> {
+                List<TypedRow> rows = getDbResult(e.getQuery(), e.getTypes());
+                return rows.stream();
+            })
+            .collect(Collectors.toList());
+
+        return new TypedEntity(entity.getTableName(), mergedRows);
     }
 }
