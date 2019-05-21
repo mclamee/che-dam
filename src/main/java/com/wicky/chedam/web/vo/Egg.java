@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -13,7 +15,18 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Egg implements Serializable {
-    private String name;
-    private String ddl;
-    private List<String> conditions;
+    private Integer id;
+    @Builder.Default
+    private List<Rope> ropes = new ArrayList<>();
+
+    private EggType type;
+    private EggYolk yolk;
+
+    public void addRope(Egg toEgg, RefKey... refKeys){
+        this.addRope(toEgg, Arrays.asList(refKeys));
+    }
+
+    public void addRope(Egg toEgg, List<RefKey> refKeys){
+        this.ropes.add(Rope.builder().from(this).to(toEgg).refKeys(refKeys).build());
+    }
 }

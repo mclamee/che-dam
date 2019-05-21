@@ -13,10 +13,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Rope implements Serializable {
-    private Egg from;
-    private Egg to;
-
+public class EggYolk implements Serializable {
+    private String name;
+    private String data;
     @Builder.Default
-    private List<RefKey> refKeys = new ArrayList<>();
+    private List<String> restrictions = new ArrayList<>();
 }

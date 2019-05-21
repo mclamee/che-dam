@@ -22,16 +22,11 @@ public class PullService {
     @Autowired
     private ExportService exportService;
 
-    public List<String> pullRope(Rope root) {
+    public List<String> pullRope(Egg root) {
         // TODO recursive to load all the eggs
         // 1. get root Egg
-        Egg curr = root.getCurr();
-        String ddl = curr.getDdl();
-
-        Rope next = null;
-        while((next = root.getNext()) != null){
-
-        }
+        Egg curr = root;
+        String ddl = curr.getYolk().getData();
 
         // 2. extract Entity from Egg
         SqlEntity entity = extractSqlEntity(ddl);

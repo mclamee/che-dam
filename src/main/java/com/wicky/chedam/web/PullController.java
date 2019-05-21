@@ -1,6 +1,7 @@
 package com.wicky.chedam.web;
 
 import com.wicky.chedam.service.PullService;
+import com.wicky.chedam.web.vo.Egg;
 import com.wicky.chedam.web.vo.Rope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,9 +20,10 @@ public class PullController {
     private PullService service;
 
     @PostMapping(value = "/pull", consumes = {APPLICATION_JSON_VALUE})
-    public @ResponseBody String pull(@RequestBody Rope ropeNode){
+    @ResponseBody
+    public String pull(@RequestBody Egg firstEgg) {
 
-        List<String> exportedInsertStatements = service.pullRope(ropeNode);
+        List<String> exportedInsertStatements = service.pullRope(firstEgg);
 
         System.out.println("exportedInsertStatements => ");
         exportedInsertStatements.forEach(System.out::println);

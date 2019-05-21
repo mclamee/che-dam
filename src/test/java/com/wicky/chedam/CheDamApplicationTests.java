@@ -3,8 +3,7 @@ package com.wicky.chedam;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wicky.chedam.web.PullController;
-import com.wicky.chedam.web.vo.Egg;
-import com.wicky.chedam.web.vo.Rope;
+import com.wicky.chedam.web.vo.*;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,26 +45,42 @@ public class CheDamApplicationTests {
         System.out.println("port = " + port);
     }
 
-    private String getDDL() {
-        return "create table order_header (" +
-                "  order_no int not null," +
-                "  order_type int not null," +
-                "  cust_name varchar(10) not null," +
-                "  ref_no int null," +
-                "  ref_type int null," +
-                "  entry_datetime datetime not null" +
-                ")";
-    }
-    private Rope createRootData() {
-        Egg header = Egg.builder().name("order_header").ddl(getDDL()).conditions(null).build();
-        return Rope.builder().curr(header).refs(null).next(null).build();
+    private String getDDL(String name) {
+	    switch (name) {
+            case "order_header":
+                return "create table order_header (" +
+                        "  order_no int not null," +
+                        "  order_type int not null," +
+                        "  cust_name varchar(10) not null," +
+                        "  ref_no int null," +
+                        "  ref_type int null," +
+                        "  entry_datetime datetime not null" +
+                        ")";
+            case "order_detail":
+                return null;
+        }
+        return null;
     }
 
-	@Test
+    private Egg createRootData() {
+        Egg header = createEgg("order_header", 0);
+        Egg detail = createEgg("order_detail", 1);
+
+        header.addRope(detail, RefKey.newRef("order_no"), RefKey.newRef("order_type"));
+
+        return header;
+    }
+
+    private Egg createEgg(String detailName, int detailId) {
+        EggYolk detailYork = EggYolk.builder().name(detailName).data(getDDL(detailName)).restrictions(null).build();
+        return Egg.builder().id(detailId).type(EggType.TABLE_DDL).yolk(detailYork).build();
+    }
+
+    @Test
 	public void usingController() {
 		assertNotNull(controller);
 
-        Rope root = createRootData();
+        Egg root = createRootData();
         String success = controller.pull(root);
 
         assertEquals("success", success);
@@ -85,7 +100,7 @@ public class CheDamApplicationTests {
                 .andExpect(content().string(Matchers.containsString("success")));
     }
 
-    private String toJson(Rope rootData) {
+    private String toJson(Egg rootData) {
         ObjectMapper mapper = new ObjectMapper();
         String result = null;
         try {
